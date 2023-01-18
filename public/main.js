@@ -54,6 +54,7 @@ socket.on("products",data=>{
     .join(" ")
     document.querySelector("#tablaProductos").innerHTML = html;
 }) 
+
 //-------------------------------------------------------------------------------------------------------//
 
 function addMessage() {

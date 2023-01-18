@@ -41,6 +41,36 @@ app.set("view engine", "handlebars");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 //-------------------------------------------------------------------------------------------------------//
+//MongoAtlas//
+//-------------------------------------------------------------------------------------------------------//
+const cookieParser = require("cookie-parser")
+const session = require("express-session")
+
+
+
+const URLMongoAtlas = "mongodb+srv://admin:admin@cluster0.cmoai1f.mongodb.net/usuarios?retryWrites=true&w=majority"
+const MongoStore = require("connect-mongo");
+const advancedOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}
+app.use(session({
+  store: MongoStore.create({
+    mongoUrl: URLMongoAtlas,
+    mongoOptions: advancedOptions
+  }),
+  secret: "HolaHola",
+  resave: false,
+  saveUninitialized: false,
+  cookie:{
+    maxAge: 60000
+  }
+}))
+
+
+
+
+//-------------------------------------------------------------------------------------------------------//
 //Inicializacion del server y gets.//
 //-------------------------------------------------------------------------------------------------------//
 const PORT = 8080;
@@ -49,13 +79,33 @@ httpServer.listen(PORT, () => {
   console.log("servidor escuchando en el puerto " + PORT);
 });
 
-app.get("/", (req, res) => {
-  res.render("datos");
+app.get("/", async (req, res) => {
+    if(req.query.user != null){
+      req.session.user = req.query.user;
+    }
+    if(req.session.user){
+      res.render("datos",{user: req.session.user});
+
+    }else{
+      res.render('login');
+    }
 });
 
 app.get("/api/productos-test", (req, res) => {
   res.render("productosTest");
 });
+
+app.get("/logout", (req, res) => {
+  const nombre = req.session.user;
+req.session.destroy( err => {
+  if (err){
+    res.json({error: "Error al desloguearse", descripcion: err})
+  } else {
+    res.render("logout",{user: nombre})
+  }
+})
+})
+
 //-------------------------------------------------------------------------------------------------------//
 // Usado para inicializar unos productos por defecto en SQL.//
 //-------------------------------------------------------------------------------------------------------//
@@ -153,7 +203,13 @@ io.on("connection", (socket) => {
   });
 
   socket.emit("productsFaker", fiveProducts());
+
+  socket.on("logedIn",(data)=>{
+
+  })
 });
+
+
 
 
 // const mensajess = {
