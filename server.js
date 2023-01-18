@@ -43,11 +43,7 @@ app.use(express.json());
 //-------------------------------------------------------------------------------------------------------//
 //MongoAtlas//
 //-------------------------------------------------------------------------------------------------------//
-const cookieParser = require("cookie-parser")
 const session = require("express-session")
-
-
-
 const URLMongoAtlas = "mongodb+srv://admin:admin@cluster0.cmoai1f.mongodb.net/usuarios?retryWrites=true&w=majority"
 const MongoStore = require("connect-mongo");
 const advancedOptions = {
@@ -66,10 +62,6 @@ app.use(session({
     maxAge: 60000
   }
 }))
-
-
-
-
 //-------------------------------------------------------------------------------------------------------//
 //Inicializacion del server y gets.//
 //-------------------------------------------------------------------------------------------------------//
@@ -203,12 +195,7 @@ io.on("connection", (socket) => {
   });
 
   socket.emit("productsFaker", fiveProducts());
-
-  socket.on("logedIn",(data)=>{
-
-  })
 });
-
 
 
 

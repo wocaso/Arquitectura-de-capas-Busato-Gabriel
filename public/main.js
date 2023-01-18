@@ -1,4 +1,8 @@
 const socket = io()
+//10 minutos de inactividad te desloguean, aunque en 1 minuto expira la session...
+// setTimeout(() => {
+//     window.location.href = "/logout";
+//   }, "600000")
 
 //-------------------------------------------------------------------------------------------------------//
 const author = new normalizr.schema.Entity("author",{},{idAttribute: 'email'});
