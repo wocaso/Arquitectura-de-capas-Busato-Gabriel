@@ -10,24 +10,34 @@ const httpServer = HttpServer(app);
 const io = new IOServer(httpServer);
 app.use(express.static("./public"));
 //-------------------------------------------------------------------------------------------------------//
+//Bcrypt//
+//-------------------------------------------------------------------------------------------------------//
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+//-------------------------------------------------------------------------------------------------------//
 //MongoDB y faker//
 //-------------------------------------------------------------------------------------------------------//
-const  {mensajes}  = require("./models/modelsMongoose.js");
-const {MongooseContainer} = require("./containers/mongooseContainer.js")
-const URLmensajes = "mongodb://127.0.0.1:27017/mensajes"
+const { mensajes, usuarios } = require("./models/modelsMongoose.js");
+const {
+  MongooseContainer,
+  MongooseContainerUsuarios,
+} = require("./containers/mongooseContainer.js");
+const URLmensajes = "mongodb://127.0.0.1:27017/mensajes";
+const URLusuarios = "mongodb://127.0.0.1:27017/usuarios";
 const mongooseDB = new MongooseContainer(URLmensajes, mensajes);
-const {fiveProducts} = require("./utils/productosFaker")
+const mongooseDBusers = new MongooseContainerUsuarios(URLusuarios, usuarios);
+const { fiveProducts } = require("./utils/productosFaker");
 //-------------------------------------------------------------------------------------------------------//
 //Normalizr//
 //-------------------------------------------------------------------------------------------------------//
 
-const {normalize, schema, denormalize} = require("normalizr")
+const { normalize, schema, denormalize } = require("normalizr");
 
 //-------------------------------------------------------------------------------------------------------//
 //SQL usado en la parte de productos basica.//
 //-------------------------------------------------------------------------------------------------------//
-const {options} = require("./ecommerce/options/mysqlconn.js");
-const { ClienteSQLproductos} = require("./ecommerce/client");
+const { options } = require("./ecommerce/options/mysqlconn.js");
+const { ClienteSQLproductos } = require("./ecommerce/client");
 async function conectarProductos() {
   const con = new ClienteSQLproductos(options);
   return con;
@@ -40,28 +50,100 @@ app.set("views", "./public/views");
 app.set("view engine", "handlebars");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+//-------------------------------------------------------------------------------------------------------//
+//Passport//
+//-------------------------------------------------------------------------------------------------------//
+//-------------//
+//Register//
+//-------------//
+
+const passport = require("passport");
+const { Strategy: LocalStrategy } = require("passport-local");
+passport.use(
+  "register",
+  new LocalStrategy(
+    {
+      passReqToCallback: true,
+    },
+    (req, username, password, done) => {
+      mongooseDBusers.getByUser(username).then((res) => {
+        if (res[0]) {
+          return done(null);
+        }
+        bcrypt.hash(password, saltRounds).then(function (hash) {
+          const newUser = {
+            username,
+            password,
+          };
+          newUser.password = hash;
+          mongooseDBusers.addNew(newUser).then((res) => {
+            done(null, res);
+          });
+        });
+      });
+    }
+  )
+);
+//-------------//
+//Login//
+//-------------//
+passport.use(
+  "login",
+  new LocalStrategy((username, password, done) => {
+    // const usuario = usuarios.find(usuario => usuario.username == username)
+    mongooseDBusers.getByUser(username).then((res) => {
+      if (!res[0]) {
+        return done(null, false);
+      }
+      bcrypt.compare(password, res[0].password).then(function (result) {
+        if (!result) {
+          return done(null, false);
+        }
+        return done(null, res[0]);
+      });
+    });
+  })
+);
+
 //-------------------------------------------------------------------------------------------------------//
 //MongoAtlas//
 //-------------------------------------------------------------------------------------------------------//
-const session = require("express-session")
-const URLMongoAtlas = "mongodb+srv://admin:admin@cluster0.cmoai1f.mongodb.net/usuarios?retryWrites=true&w=majority"
+const session = require("express-session");
+const URLMongoAtlas =
+  "mongodb+srv://admin:admin@cluster0.cmoai1f.mongodb.net/usuarios?retryWrites=true&w=majority";
 const MongoStore = require("connect-mongo");
 const advancedOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}
-app.use(session({
-  store: MongoStore.create({
-    mongoUrl: URLMongoAtlas,
-    mongoOptions: advancedOptions
-  }),
-  secret: "HolaHola",
-  resave: false,
-  saveUninitialized: false,
-  cookie:{
-    maxAge: 60000
-  }
-}))
+};
+app.use(
+  session({
+    store: MongoStore.create({
+      mongoUrl: URLMongoAtlas,
+      mongoOptions: advancedOptions,
+    }),
+    secret: "HolaHola",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 600000,
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+  done(null, user.username);
+});
+
+passport.deserializeUser((username, done) => {
+  mongooseDBusers.getByUser(username).then((res) => {
+    done(null, res);
+  });
+});
 //-------------------------------------------------------------------------------------------------------//
 //Inicializacion del server y gets.//
 //-------------------------------------------------------------------------------------------------------//
@@ -71,32 +153,62 @@ httpServer.listen(PORT, () => {
   console.log("servidor escuchando en el puerto " + PORT);
 });
 
-app.get("/", async (req, res) => {
-    if(req.query.user != null){
-      req.session.user = req.query.user;
-    }
-    if(req.session.user){
-      res.render("datos",{user: req.session.user});
+//----------------------------//
+//    Rutas Registro
+//----------------------------//
+app.get("/register", (req, res) => {
+  res.render("register");
+});
 
-    }else{
-      res.render('login');
-    }
+app.post(
+  "/register",
+  passport.authenticate("register", {
+    failureRedirect: "/failregister",
+    successRedirect: "/datos",
+  })
+);
+
+app.get("/failregister", (req, res) => {
+  res.render("register-error");
+});
+//----------------------------//
+//    Rutas Login
+//----------------------------//
+app.get("/login", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.redirect("/datos");
+  }
+  res.render("login");
+});
+
+app.post(
+  "/login",
+  passport.authenticate("login", {
+    failureRedirect: "/faillogin",
+    successRedirect: "/datos",
+  })
+);
+
+app.get("/faillogin", (req, res) => {
+  res.render("login-error");
+});
+
+app.get("/datos", (req, res) => {
+  res.render("datos", { user: req.session.passport.user });
+});
+//----------------------------//
+//    Rutas Logout
+//----------------------------//
+
+app.get("/logout", (req, res) => {
+  req.logout((err) => {
+    res.redirect("/login");
+  });
 });
 
 app.get("/api/productos-test", (req, res) => {
   res.render("productosTest");
 });
-
-app.get("/logout", (req, res) => {
-  const nombre = req.session.user;
-req.session.destroy( err => {
-  if (err){
-    res.json({error: "Error al desloguearse", descripcion: err})
-  } else {
-    res.render("logout",{user: nombre})
-  }
-})
-})
 
 //-------------------------------------------------------------------------------------------------------//
 // Usado para inicializar unos productos por defecto en SQL.//
@@ -144,13 +256,12 @@ req.session.destroy( err => {
 
 io.on("connection", (socket) => {
   console.log("un cliente se ha conectado");
-  mongooseDB.getAll().then((res)=>{
-    let dataString =  JSON.stringify(res);
+  mongooseDB.getAll().then((res) => {
+    let dataString = JSON.stringify(res);
     let dataParse = JSON.parse(dataString);
-    const msjsNorm = normalize(dataParse[0] , msjsSchema);
+    const msjsNorm = normalize(dataParse[0], msjsSchema);
     socket.emit("messages", msjsNorm);
-    // socket.emit("messages", res[0].messages);
-  })
+  });
   conectarProductos().then((res) => {
     const sql = res;
     sql
@@ -169,14 +280,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("new-message", (data) => {
-    mongooseDB.addNew(data).then(()=>{
-      mongooseDB.getAll().then((res)=>{
-        let dataString =  JSON.stringify(res);
+    mongooseDB.addNew(data).then(() => {
+      mongooseDB.getAll().then((res) => {
+        let dataString = JSON.stringify(res);
         let dataParse = JSON.parse(dataString);
-        const msjsNorm = normalize(dataParse[0] , msjsSchema);
+        const msjsNorm = normalize(dataParse[0], msjsSchema);
         socket.emit("messages", msjsNorm);
-      })
-    })
+      });
+    });
   });
   socket.on("new-producto", (data) => {
     conectarProductos().then((res) => {
@@ -196,8 +307,6 @@ io.on("connection", (socket) => {
 
   socket.emit("productsFaker", fiveProducts());
 });
-
-
 
 // const mensajess = {
 //   id: "coderChat",
@@ -277,8 +386,7 @@ io.on("connection", (socket) => {
 //   ],
 // };
 
-
-const author = new schema.Entity("author",{},{idAttribute: 'email'});
+const author = new schema.Entity("author", {}, { idAttribute: "email" });
 
 const msj = new schema.Entity("message", {
   author: author,
@@ -287,12 +395,3 @@ const msj = new schema.Entity("message", {
 const msjsSchema = new schema.Entity("messages", {
   messages: [msj],
 });
-
-
-
-
-
-
-
-
-

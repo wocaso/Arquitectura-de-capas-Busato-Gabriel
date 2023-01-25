@@ -26,6 +26,17 @@ const MensajesSchema = new mongoose.Schema(
 
 const mensajes = mongoose.model(mensajesCollection, MensajesSchema)
 
-module.exports = {mensajes};
+
+const usuariosCollection = "usuarios"
+
+const UserSchema = new mongoose.Schema({
+        username: String,
+        password: String,
+
+    })
+
+const usuarios = mongoose.model(usuariosCollection, UserSchema)
+
+module.exports = {mensajes, usuarios};
 
 

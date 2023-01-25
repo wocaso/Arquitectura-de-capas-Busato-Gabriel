@@ -66,6 +66,56 @@ class MongooseContainer{
 
 }
 //============================================================================================================================================================//
+class MongooseContainerUsuarios{
+  constructor(collection, model) {
+      this.collection = collection;
+      this.model = model;
+    }
 
+
+    async #connectDB() {
+      return mongoose.connect(this.collection, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    }
+  
+    async #disconnectDB() {
+      await mongoose.disconnect();
+    }
+
+    async getByUser(user){  
+      try{
+        await this.#connectDB()
+          const usuario = await this.model.find({username: user});
+          return usuario
+      }catch(error){
+          console.log(error)
+      }finally {
+          await this.#disconnectDB();
+        }
+      
+  
+  }
+
+  async addNew(Producto){
+        
+    try{
+      await this.#connectDB()
+        const newProducto = new this.model(Producto);
+        const insertedProducto = await newProducto.save();
+        return insertedProducto;
+    }catch(error){
+        console.log(error)
+    }finally {
+        await this.#disconnectDB();
+      }
+}
+
+
+
+
+
+}
 //============================================================================================================================================================//
-module.exports = {MongooseContainer}
+module.exports = {MongooseContainer, MongooseContainerUsuarios}
