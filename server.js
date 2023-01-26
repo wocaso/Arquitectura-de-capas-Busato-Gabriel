@@ -105,6 +105,16 @@ passport.use(
     });
   })
 );
+//-------------//
+//reqAuth//
+//-------------//
+function requireAuthentication(req, res, next) {
+  if (req.isAuthenticated()) {
+      next()
+  } else {
+      res.redirect('/login')
+  }
+}
 
 //-------------------------------------------------------------------------------------------------------//
 //MongoAtlas//
@@ -193,8 +203,13 @@ app.get("/faillogin", (req, res) => {
   res.render("login-error");
 });
 
-app.get("/datos", (req, res) => {
+
+app.get("/datos",requireAuthentication, (req, res) => {
+
   res.render("datos", { user: req.session.passport.user });
+    
+
+  
 });
 //----------------------------//
 //    Rutas Logout
