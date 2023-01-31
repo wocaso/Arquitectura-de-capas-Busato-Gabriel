@@ -6,32 +6,64 @@ const handlebars = require("express-handlebars");
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
 const app = express();
+
 const httpServer = HttpServer(app);
 const io = new IOServer(httpServer);
 app.use(express.static("./public"));
+//-------------------------------------------------------------------------------------------------------//
+//Router y fork//
+//-------------------------------------------------------------------------------------------------------//
+const {fork} = require("child_process")
+const {Router} = express;
+const routerNumeros = new Router();
+app.use("/api/randoms", routerNumeros);
 //-------------------------------------------------------------------------------------------------------//
 //Bcrypt//
 //-------------------------------------------------------------------------------------------------------//
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 //-------------------------------------------------------------------------------------------------------//
+//Dotenv y yargs//
+//-------------------------------------------------------------------------------------------------------//
+const dotenv = require("dotenv");
+dotenv.config();
+
+const parseArgs = require("yargs/yargs");
+const yargs = parseArgs(process.argv.slice(2));
+const { PORT } = yargs
+  .alias({
+    p: "PORT",
+  })
+  .default({
+    PORT: 8080,
+  }).argv;
+
+console.log({ PORT });
+//-------------------------------------------------------------------------------------------------------//
 //MongoDB y faker//
 //-------------------------------------------------------------------------------------------------------//
+//importo los modelos
 const { mensajes, usuarios } = require("./models/modelsMongoose.js");
+//importo los containers
 const {
   MongooseContainer,
   MongooseContainerUsuarios,
 } = require("./containers/mongooseContainer.js");
-const URLmensajes = "mongodb://127.0.0.1:27017/mensajes";
-const URLusuarios = "mongodb://127.0.0.1:27017/usuarios";
-const mongooseDB = new MongooseContainer(URLmensajes, mensajes);
-const mongooseDBusers = new MongooseContainerUsuarios(URLusuarios, usuarios);
+//Creo las instancias para usar las bases de datos
+const mongooseDB = new MongooseContainer(
+  process.env.MONGOURLmensajes,
+  mensajes
+);
+const mongooseDBusers = new MongooseContainerUsuarios(
+  process.env.MONGOURLusuarios,
+  usuarios
+);
 const { fiveProducts } = require("./utils/productosFaker");
 //-------------------------------------------------------------------------------------------------------//
 //Normalizr//
 //-------------------------------------------------------------------------------------------------------//
 
-const { normalize, schema, denormalize } = require("normalizr");
+const { normalize, schema } = require("normalizr");
 
 //-------------------------------------------------------------------------------------------------------//
 //SQL usado en la parte de productos basica.//
@@ -91,7 +123,6 @@ passport.use(
 passport.use(
   "login",
   new LocalStrategy((username, password, done) => {
-    // const usuario = usuarios.find(usuario => usuario.username == username)
     mongooseDBusers.getByUser(username).then((res) => {
       if (!res[0]) {
         return done(null, false);
@@ -110,18 +141,16 @@ passport.use(
 //-------------//
 function requireAuthentication(req, res, next) {
   if (req.isAuthenticated()) {
-      next()
+    next();
   } else {
-      res.redirect('/login')
+    res.redirect("/login");
   }
 }
 
 //-------------------------------------------------------------------------------------------------------//
-//MongoAtlas//
+//MongoAtlas-Session//
 //-------------------------------------------------------------------------------------------------------//
 const session = require("express-session");
-const URLMongoAtlas =
-  "mongodb+srv://admin:admin@cluster0.cmoai1f.mongodb.net/usuarios?retryWrites=true&w=majority";
 const MongoStore = require("connect-mongo");
 const advancedOptions = {
   useNewUrlParser: true,
@@ -130,10 +159,10 @@ const advancedOptions = {
 app.use(
   session({
     store: MongoStore.create({
-      mongoUrl: URLMongoAtlas,
+      mongoUrl: process.env.URLMongoAtlas,
       mongoOptions: advancedOptions,
     }),
-    secret: "HolaHola",
+    secret: process.env.SessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -157,7 +186,6 @@ passport.deserializeUser((username, done) => {
 //-------------------------------------------------------------------------------------------------------//
 //Inicializacion del server y gets.//
 //-------------------------------------------------------------------------------------------------------//
-const PORT = 8080;
 
 httpServer.listen(PORT, () => {
   console.log("servidor escuchando en el puerto " + PORT);
@@ -202,14 +230,12 @@ app.post(
 app.get("/faillogin", (req, res) => {
   res.render("login-error");
 });
+//----------------------------//
+//    Rutas datos
+//----------------------------//
 
-
-app.get("/datos",requireAuthentication, (req, res) => {
-
+app.get("/datos", requireAuthentication, (req, res) => {
   res.render("datos", { user: req.session.passport.user });
-    
-
-  
 });
 //----------------------------//
 //    Rutas Logout
@@ -224,7 +250,36 @@ app.get("/logout", (req, res) => {
 app.get("/api/productos-test", (req, res) => {
   res.render("productosTest");
 });
+//----------------------------//
+//    Ruta info
+//----------------------------//
+console.log();
+app.get("/info", (req, res) => {
+  res.render("info", {
+    SO: process.platform,
+    ArgEntr: JSON.stringify(yargs.argv),
+    NodeVersion: process.version,
+    ReservedMemory: process.memoryUsage().rss,
+    pathEjecucion: process.cwd(),
+    processID: process.pid,
+    proyectFolder: process.cwd().split("\\").pop(),
+  });
+});
 
+//----------------------------//
+//    Ruta numeros random
+//----------------------------//
+routerNumeros.get("/",(req, res)=>{
+  const numFork = fork("./utils/count.js");
+  let cantidad = 10000000;
+  if(req.query.cant != null){
+    cantidad = req.query.cant;
+  }
+  numFork.send(cantidad)
+  numFork.on("message", msg=>{
+      res.send(msg);
+  })
+})
 //-------------------------------------------------------------------------------------------------------//
 // Usado para inicializar unos productos por defecto en SQL.//
 //-------------------------------------------------------------------------------------------------------//
