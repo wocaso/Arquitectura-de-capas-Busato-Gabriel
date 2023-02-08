@@ -1,0 +1,27 @@
+1. Nodemon
+	nodemon server.js -p  8080   
+	nodemon server.js -p  8080 -m CLUSTER
+
+2. Forever
+	forever start server.js -w -p 8080
+	forever start server.js -w -p 8080 -m CLUSTER
+	forever list
+
+3. PM2
+	pm2 start server.js --watch
+	pm2 start server.js --watch -i max
+	pm2 list
+
+4-Ngix
+  a)
+	config: 1
+	forever start server.js -w -p 8080
+	forever start server.js -w -p 8081 -m CLUSTER
+  b)
+
+	config: 2
+	start server.js -w -p 8080
+	start server.js -w -p 8082
+	start server.js -w -p 8083
+	start server.js -w -p 8084
+	start server.js -w -p 8085
