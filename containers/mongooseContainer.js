@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const {errorLogger}= require("../utils/logger")
 // function getDate() {
 //   let fullDate = new Date();
 //   let date =
@@ -41,7 +42,7 @@ class MongooseContainer{
             const allMensajes = await this.model.find();
             return allMensajes; 
         }catch(error){
-            console.log(error)
+          errorLogger.error(error)
         }finally {
           await this.#disconnectDB();
         }
@@ -57,7 +58,7 @@ class MongooseContainer{
           })
             return insertedMensaje;
         }catch(error){
-            console.log(error)
+          errorLogger.error(error)
         }finally {
             await this.#disconnectDB();
           }
@@ -90,7 +91,7 @@ class MongooseContainerUsuarios{
           const usuario = await this.model.find({username: user});
           return usuario
       }catch(error){
-          console.log(error)
+        errorLogger.error(error)
       }finally {
           await this.#disconnectDB();
         }
@@ -106,7 +107,7 @@ class MongooseContainerUsuarios{
         const insertedProducto = await newProducto.save();
         return insertedProducto;
     }catch(error){
-        console.log(error)
+      errorLogger.error(error)
     }finally {
         await this.#disconnectDB();
       }

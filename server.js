@@ -6,29 +6,40 @@ const handlebars = require("express-handlebars");
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
 //-------------------------------------------------------------------------------------------------------//
+//Compression y winston//
+//-------------------------------------------------------------------------------------------------------//
+const compression = require("compression");
+const {infoLogger, warnLogger, errorLogger} = require("./utils/logger.js")
+function showReqDataInfo(req){
+  infoLogger.info("Hiciste un "+req.method+" a la ruta: '" +req.originalUrl+"'");
+}
+function showReqDataWarn(req){
+  warnLogger.warn("intentaste hacer un "+req.method+" a la ruta: '" +req.originalUrl+"' pero esta no existe :c");
+}
+//-------------------------------------------------------------------------------------------------------//
 //Dotenv y yargs//
 //-------------------------------------------------------------------------------------------------------//
 const dotenv = require("dotenv");
 dotenv.config();
 
-//minimist
-const parseArgs = require("minimist");
-const args = parseArgs(process.argv.slice(2));
-const MODE = args.m || "FORK";
-const PORT = args.p || 8080;
+// //minimist
+// const parseArgs = require("minimist");
+// const args = parseArgs(process.argv.slice(2));
+// const MODE = args.m || "FORK";
+// const PORT = args.p || 8080;
 
-//yargs
-// const parseArgs = require("yargs/yargs");
-// const yargs = parseArgs(process.argv.slice(2));
-// const { PORT, MODE } = yargs
-//   .alias({
-//     p: "PORT",
-//     m: "MODE",
-//   })
-//   .default({
-//     PORT: 8080,
-//     MODE: "FORK",
-//   }).argv;
+// yargs
+const parseArgs = require("yargs/yargs");
+const yargs = parseArgs(process.argv.slice(2));
+const { PORT, MODE } = yargs
+  .alias({
+    p: "PORT",
+    m: "MODE",
+  })
+  .default({
+    PORT: 8080,
+    MODE: "FORK",
+  }).argv;
 
 console.log({ PORT, MODE });
 //-------------------------------------------------------------------------------------------------------//
@@ -44,7 +55,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
     cluster.fork();
   }
   cluster.on("exit", (worker) => {
-    console.log(`worker ${worker.process.pid} termino`);
+    cluster.fork();
   });
 
   //dato importante: este "else" llega hasta el final del archivo.
@@ -199,6 +210,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(compression())
 
   passport.serializeUser((user, done) => {
     done(null, user.username);
@@ -214,14 +226,18 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   //-------------------------------------------------------------------------------------------------------//
 
   httpServer.listen(PORT, () => {
-    console.log("servidor escuchando en el puerto " + PORT);
+    infoLogger.info("servidor escuchando en el puerto " + PORT);   
   });
 
   //----------------------------//
   //    Rutas Registro
   //----------------------------//
+
+
+
   app.get("/register", (req, res) => {
     res.render("register");
+    showReqDataInfo(req)
   });
 
   app.post(
@@ -234,15 +250,21 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   app.get("/failregister", (req, res) => {
     res.render("register-error");
+    showReqDataInfo(req)
   });
   //----------------------------//
   //    Rutas Login
   //----------------------------//
   app.get("/login", (req, res) => {
+    showReqDataInfo(req)
     if (req.isAuthenticated()) {
       res.redirect("/datos");
+    }else{
+      res.render("login");
     }
-    res.render("login");
+
+    
+
   });
 
   app.post(
@@ -255,6 +277,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   app.get("/faillogin", (req, res) => {
     res.render("login-error");
+    showReqDataInfo(req)
   });
   //----------------------------//
   //    Rutas datos
@@ -262,12 +285,14 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   app.get("/datos", requireAuthentication, (req, res) => {
     res.render("datos", { user: req.session.passport.user });
+    showReqDataInfo(req)
   });
   //----------------------------//
   //    Rutas Logout
   //----------------------------//
 
   app.get("/logout", (req, res) => {
+    showReqDataInfo(req)
     req.logout((err) => {
       res.redirect("/login");
     });
@@ -275,6 +300,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   app.get("/api/productos-test", (req, res) => {
     res.render("productosTest");
+    showReqDataInfo(req)
   });
   //----------------------------//
   //    Ruta info
@@ -291,21 +317,31 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
       proyectFolder: process.cwd().split("\\").pop(),
       numProcesadores: numCpus,
     });
+    showReqDataInfo(req)
+    // console.log("Hola")
   });
 
   //----------------------------//
   //    Ruta numeros random
   //----------------------------//
-  routerNumeros.get("/", (req, res) => {
-    const numFork = fork("./utils/count.js");
-    let cantidad = 10000000;
-    if (req.query.cant != null) {
-      cantidad = req.query.cant;
-    }
-    numFork.send(cantidad);
-    numFork.on("message", (msg) => {
-      res.send(msg);
-    });
+  // routerNumeros.get("/", (req, res) => {
+  //   const numFork = fork("./utils/count.js");
+  //   let cantidad = 10000000;
+  //   if (req.query.cant != null) {
+  //     cantidad = req.query.cant;
+  //   }
+  //   numFork.send(cantidad);
+  //   numFork.on("message", (msg) => {
+  //     res.send(msg);
+  //   });
+  //   showReqDataInfo(req)
+  // });
+  //----------------------------//
+  //    Ruta general
+  //----------------------------//
+  app.get("*", (req, res) => {
+    res.redirect("/datos");
+    showReqDataWarn(req)
   });
   //-------------------------------------------------------------------------------------------------------//
   // Usado para inicializar unos productos por defecto en SQL.//
@@ -366,10 +402,13 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
         .then((items) => {
           socket.emit("products", items);
         })
-        .catch(() =>
+        .catch((err) =>{
           sql.crearTabla().then(() => {
-            console.log("Tabla productos creada");
-          })
+          console.log("Tabla productos creada");
+          errorLogger.error(err)
+        })}
+          
+          
         )
         .finally(() => {
           sql.close();
@@ -395,7 +434,9 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
             sql.listarProductos().then((items) => {
               socket.emit("products", items);
             })
-          )
+          ).catch(err=>{
+            errorLogger.error(err)
+          })
           .finally(() => {
             sql.close();
           });

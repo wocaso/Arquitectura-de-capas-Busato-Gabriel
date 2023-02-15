@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "test": "node benchmark.js",
+    "start": "0x server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
+    "autocannon": "^7.10.0",
     "bcrypt": "^5.1.0",
+    "compression": "^1.7.4",
     "connect-mongo": "^4.6.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
@@ -19,6 +21,7 @@
     "express-handlebars": "^6.0.6",
     "express-session": "^1.17.3",
     "knex": "^2.4.0",
+    "log4js": "^6.7.1",
     "minimist": "^1.2.7",
     "mongoose": "^6.8.3",
     "mysql": "^2.18.1",
@@ -28,6 +31,7 @@
     "passport-local": "^1.0.0",
     "socket.io": "^4.5.4",
     "sqlite3": "^5.1.4",
+    "winston": "^3.8.2",
     "yargs": "^17.6.2"
   },
   "description": ""
