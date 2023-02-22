@@ -389,12 +389,6 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   io.on("connection", (socket) => {
     console.log("un cliente se ha conectado");
-    mongooseDB.getAll().then((res) => {
-      let dataString = JSON.stringify(res);
-      let dataParse = JSON.parse(dataString);
-      const msjsNorm = normalize(dataParse[0], msjsSchema);
-      socket.emit("messages", msjsNorm);
-    });
     conectarProductos().then((res) => {
       const sql = res;
       sql
@@ -414,13 +408,19 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
           sql.close();
         });
     });
+    // mongooseDB.getAll().then((res) => {
+    //   let dataString = JSON.stringify(res);
+    //   let dataParse = JSON.parse(dataString);
+    //   const msjsNorm = normalize(dataParse[0], msjsSchema);
+    //   socket.emit("messages", msjsNorm);
+    // });
 
     socket.on("new-message", (data) => {
       mongooseDB.addNew(data).then(() => {
 
         mongooseDB.getAll().then((res) => {
           let dataString = JSON.stringify(res);
-          let dataParse = JSON.parse(res);
+          let dataParse = JSON.parse(dataString);
           const msjsNorm = normalize(dataParse[0], msjsSchema);
           socket.emit("messages", msjsNorm);
         });
