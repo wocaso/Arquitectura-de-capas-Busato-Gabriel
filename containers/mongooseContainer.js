@@ -40,9 +40,10 @@ class MongooseContainer{
         try{
             await this.#connectDB()
             const allMensajes = await this.model.find();
+            await console.log(allMensajes)
             return allMensajes; 
         }catch(error){
-          errorLogger.error(error)
+          errorLogger.error("no se pudieron traer los mensajes error:"+error)
         }finally {
           await this.#disconnectDB();
         }
@@ -63,6 +64,7 @@ class MongooseContainer{
             await this.#disconnectDB();
           }
     }
+
 
 
 }

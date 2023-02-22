@@ -1,0 +1,115 @@
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"address":"ac-om1sbzo-shard-00-02.cmoai1f.mongodb.net:27017","level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"kind":"embedded","message":"Cast to embedded failed for value \"{\n  id: 'coderChat',\n  messages: [\n    { author: [Object], text: 'Holis', id: 0 },\n    { author: [Object], text: 'Alguien me responde', id: 1 },\n    { author: [Object], text: 'Bueno', id: 2 },\n    { author: [Object], text: 'ei hola', id: 3 },\n    { author: [Object], text: 'Hola hola hola', id: 4 },\n    { author: [Object], text: 'bueno.....', id: 5 }\n  ]\n}\" (type Object) at path \"messages\" because of \"CastError\"","name":"CastError","path":"messages","reason":{"kind":"Number","message":"Cast to Number failed for value \"coderChat\" (type string) at path \"id\"","name":"CastError","path":"id","reason":{"actual":false,"code":"ERR_ASSERTION","expected":true,"generatedMessage":true,"operator":"=="},"stringValue":"\"coderChat\"","value":"coderChat","valueType":"string"},"stringValue":"\"{\n  id: 'coderChat',\n  messages: [\n    { author: [Object], text: 'Holis', id: 0 },\n    { author: [Object], text: 'Alguien me responde', id: 1 },\n    { author: [Object], text: 'Bueno', id: 2 },\n    { author: [Object], text: 'ei hola', id: 3 },\n    { author: [Object], text: 'Hola hola hola', id: 4 },\n    { author: [Object], text: 'bueno.....', id: 5 }\n  ]\n}\"","value":{"id":"coderChat","messages":[{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":0,"text":"Holis"},{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":1,"text":"Alguien me responde"},{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":2,"text":"Bueno"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":3,"text":"ei hola"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":4,"text":"Hola hola hola"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":5,"text":"bueno....."}]},"valueType":"Object"}
+{"kind":"embedded","message":"Cast to embedded failed for value \"{\n  id: 'coderChat',\n  messages: [\n    { author: [Object], text: 'Holis', id: 0 },\n    { author: [Object], text: 'Alguien me responde', id: 1 },\n    { author: [Object], text: 'Bueno', id: 2 },\n    { author: [Object], text: 'ei hola', id: 3 },\n    { author: [Object], text: 'Hola hola hola', id: 4 },\n    { author: [Object], text: 'bueno.....', id: 5 }\n  ]\n}\" (type Object) at path \"messages\" because of \"CastError\"","name":"CastError","path":"messages","reason":{"kind":"Number","message":"Cast to Number failed for value \"coderChat\" (type string) at path \"id\"","name":"CastError","path":"id","reason":{"actual":false,"code":"ERR_ASSERTION","expected":true,"generatedMessage":true,"operator":"=="},"stringValue":"\"coderChat\"","value":"coderChat","valueType":"string"},"stringValue":"\"{\n  id: 'coderChat',\n  messages: [\n    { author: [Object], text: 'Holis', id: 0 },\n    { author: [Object], text: 'Alguien me responde', id: 1 },\n    { author: [Object], text: 'Bueno', id: 2 },\n    { author: [Object], text: 'ei hola', id: 3 },\n    { author: [Object], text: 'Hola hola hola', id: 4 },\n    { author: [Object], text: 'bueno.....', id: 5 }\n  ]\n}\"","value":{"id":"coderChat","messages":[{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":0,"text":"Holis"},{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":1,"text":"Alguien me responde"},{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":2,"text":"Bueno"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":3,"text":"ei hola"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":4,"text":"Hola hola hola"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":5,"text":"bueno....."}]},"valueType":"Object"}
+{"kind":"embedded","message":"Cast to embedded failed for value \"{\n  id: 'coderChat',\n  messages: [\n    { author: [Object], text: 'Holis', id: 0 },\n    { author: [Object], text: 'Alguien me responde', id: 1 },\n    { author: [Object], text: 'Bueno', id: 2 },\n    { author: [Object], text: 'ei hola', id: 3 },\n    { author: [Object], text: 'Hola hola hola', id: 4 },\n    { author: [Object], text: 'bueno.....', id: 5 }\n  ]\n}\" (type Object) at path \"messages\" because of \"CastError\"","name":"CastError","path":"messages","reason":{"kind":"Number","message":"Cast to Number failed for value \"coderChat\" (type string) at path \"id\"","name":"CastError","path":"id","reason":{"actual":false,"code":"ERR_ASSERTION","expected":true,"generatedMessage":true,"operator":"=="},"stringValue":"\"coderChat\"","value":"coderChat","valueType":"string"},"stringValue":"\"{\n  id: 'coderChat',\n  messages: [\n    { author: [Object], text: 'Holis', id: 0 },\n    { author: [Object], text: 'Alguien me responde', id: 1 },\n    { author: [Object], text: 'Bueno', id: 2 },\n    { author: [Object], text: 'ei hola', id: 3 },\n    { author: [Object], text: 'Hola hola hola', id: 4 },\n    { author: [Object], text: 'bueno.....', id: 5 }\n  ]\n}\"","value":{"id":"coderChat","messages":[{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":0,"text":"Holis"},{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":1,"text":"Alguien me responde"},{"author":{"alias":"Edu","apellido":"Bustamante","avatar":"Hermoso avatar.jpg","edad":"20","email":"Eduardo@gmail.com","nombre":"Eduardo"},"id":2,"text":"Bueno"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":3,"text":"ei hola"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":4,"text":"Hola hola hola"},{"author":{"alias":"Carli","apellido":"Lopez","avatar":"Feo avatar.jpg","edad":"30","email":"Carla@gmail.com","nombre":"Carla"},"id":5,"text":"bueno....."}]},"valueType":"Object"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongooseError: Can't call `openUri()` on an active connection with different connection strings. Make sure you aren't calling `mongoose.connect()` multiple times. See: https://mongoosejs.com/docs/connections.html#multiple_connections"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoServerClosedError: Server is closed"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoServerClosedError: Server is closed"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoServerClosedError: Server is closed"}

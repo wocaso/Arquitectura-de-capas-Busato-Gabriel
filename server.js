@@ -417,6 +417,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
     socket.on("new-message", (data) => {
       mongooseDB.addNew(data).then(() => {
+
         mongooseDB.getAll().then((res) => {
           let dataString = JSON.stringify(res);
           let dataParse = JSON.parse(dataString);
