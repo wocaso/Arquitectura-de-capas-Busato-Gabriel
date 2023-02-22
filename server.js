@@ -420,7 +420,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
         mongooseDB.getAll().then((res) => {
           let dataString = JSON.stringify(res);
-          let dataParse = JSON.parse(dataString);
+          let dataParse = JSON.parse(res);
           const msjsNorm = normalize(dataParse[0], msjsSchema);
           socket.emit("messages", msjsNorm);
         });

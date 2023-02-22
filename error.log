@@ -113,3 +113,4 @@
 {"level":"error"}
 {"level":"error"}
 {"level":"error","message":"no se pudieron traer los mensajes error:MongoServerClosedError: Server is closed"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongooseError: The `uri` parameter to `openUri()` must be a string, got \"undefined\". Make sure the first parameter to `mongoose.connect()` or `mongoose.createConnection()` is a string."}

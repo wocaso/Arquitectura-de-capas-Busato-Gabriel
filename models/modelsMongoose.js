@@ -21,7 +21,7 @@ const MensajeSchema = new mongoose.Schema(
 
 const MensajesSchema = new mongoose.Schema(
         {id: String,
-        messages:[MensajeSchema]})
+        messages:[MensajeSchema], _id: false})
 
 const mensajes = mongoose.model(mensajesCollection, MensajesSchema)
 
