@@ -389,6 +389,15 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   io.on("connection", (socket) => {
     console.log("un cliente se ha conectado");
+        // mongooseDB.getAll().then((res) => {
+        //   let dataString = JSON.stringify(res);
+        //   let dataParse = JSON.parse(dataString);
+        //   const msjsNorm = normalize(dataParse[0], msjsSchema);
+        //   socket.emit("messages", msjsNorm);
+        // });
+        const msjsNorm = normalize(mensajess, msjsSchema);
+        socket.emit("messages", msjsNorm);
+
     conectarProductos().then((res) => {
       const sql = res;
       sql
@@ -408,23 +417,20 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
           sql.close();
         });
     });
-    // mongooseDB.getAll().then((res) => {
-    //   let dataString = JSON.stringify(res);
-    //   let dataParse = JSON.parse(dataString);
-    //   const msjsNorm = normalize(dataParse[0], msjsSchema);
-    //   socket.emit("messages", msjsNorm);
-    // });
 
     socket.on("new-message", (data) => {
-      mongooseDB.addNew(data).then(() => {
+      // mongooseDB.addNew(data).then(() => {
 
-        mongooseDB.getAll().then((res) => {
-          let dataString = JSON.stringify(res);
-          let dataParse = JSON.parse(dataString);
-          const msjsNorm = normalize(dataParse[0], msjsSchema);
+        // mongooseDB.getAll().then((res) => {
+        //   let dataString = JSON.stringify(res);
+        //   let dataParse = JSON.parse(dataString);
+        //   const msjsNorm = normalize(dataParse[0], msjsSchema);
+        //   socket.emit("messages", msjsNorm);
+        // });
+          mensajess.messages.push(data)
+          const msjsNorm = normalize(mensajess, msjsSchema);
           socket.emit("messages", msjsNorm);
-        });
-      });
+      // });
     });
     socket.on("new-producto", (data) => {
       conectarProductos().then((res) => {
@@ -447,83 +453,83 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
     socket.emit("productsFaker", fiveProducts());
   });
 
-  // const mensajess = {
-  //   id: "coderChat",
-  //   messages: [
-  //     {
-  //       author: {
-  //         email: "Eduardo@gmail.com",
-  //         nombre: "Eduardo",
-  //         apellido: "Bustamante",
-  //         edad: "20",
-  //         alias: "Edu",
-  //         avatar: "Hermoso avatar.jpg",
-  //       },
-  //       text: "Holis",
-  //       id: 0,
-  //     },
-  //     {
-  //       author: {
-  //         email: "Eduardo@gmail.com",
-  //         nombre: "Eduardo",
-  //         apellido: "Bustamante",
-  //         edad: "20",
-  //         alias: "Edu",
-  //         avatar: "Hermoso avatar.jpg",
-  //       },
-  //       text: "Alguien me responde",
-  //       id: 1,
-  //     },
-  //     {
-  //       author: {
-  //         email: "Eduardo@gmail.com",
-  //         nombre: "Eduardo",
-  //         apellido: "Bustamante",
-  //         edad: "20",
-  //         alias: "Edu",
-  //         avatar: "Hermoso avatar.jpg",
-  //       },
-  //       text: "Bueno",
-  //       id: 2,
-  //     },
-  //     {
-  //       author: {
-  //         email: "Carla@gmail.com",
-  //         nombre: "Carla",
-  //         apellido: "Lopez",
-  //         edad: "30",
-  //         alias: "Carli",
-  //         avatar: "Feo avatar.jpg",
-  //       },
-  //       text: "ei hola",
-  //       id: 3,
-  //     },
-  //     {
-  //       author: {
-  //         email: "Carla@gmail.com",
-  //         nombre: "Carla",
-  //         apellido: "Lopez",
-  //         edad: "30",
-  //         alias: "Carli",
-  //         avatar: "Feo avatar.jpg",
-  //       },
-  //       text: "Hola hola hola",
-  //       id: 4,
-  //     },
-  //     {
-  //       author: {
-  //         email: "Carla@gmail.com",
-  //         nombre: "Carla",
-  //         apellido: "Lopez",
-  //         edad: "30",
-  //         alias: "Carli",
-  //         avatar: "Feo avatar.jpg",
-  //       },
-  //       text: "bueno.....",
-  //       id: 5,
-  //     },
-  //   ],
-  // };
+  const mensajess = {
+    id: "coderChat",
+    messages: [
+      {
+        author: {
+          email: "Eduardo@gmail.com",
+          nombre: "Eduardo",
+          apellido: "Bustamante",
+          edad: "20",
+          alias: "Edu",
+          avatar: "Hermoso avatar.jpg",
+        },
+        text: "Holis",
+        id: 0,
+      },
+      {
+        author: {
+          email: "Eduardo@gmail.com",
+          nombre: "Eduardo",
+          apellido: "Bustamante",
+          edad: "20",
+          alias: "Edu",
+          avatar: "Hermoso avatar.jpg",
+        },
+        text: "Alguien me responde",
+        id: 1,
+      },
+      {
+        author: {
+          email: "Eduardo@gmail.com",
+          nombre: "Eduardo",
+          apellido: "Bustamante",
+          edad: "20",
+          alias: "Edu",
+          avatar: "Hermoso avatar.jpg",
+        },
+        text: "Bueno",
+        id: 2,
+      },
+      {
+        author: {
+          email: "Carla@gmail.com",
+          nombre: "Carla",
+          apellido: "Lopez",
+          edad: "30",
+          alias: "Carli",
+          avatar: "Feo avatar.jpg",
+        },
+        text: "ei hola",
+        id: 3,
+      },
+      {
+        author: {
+          email: "Carla@gmail.com",
+          nombre: "Carla",
+          apellido: "Lopez",
+          edad: "30",
+          alias: "Carli",
+          avatar: "Feo avatar.jpg",
+        },
+        text: "Hola hola hola",
+        id: 4,
+      },
+      {
+        author: {
+          email: "Carla@gmail.com",
+          nombre: "Carla",
+          apellido: "Lopez",
+          edad: "30",
+          alias: "Carli",
+          avatar: "Feo avatar.jpg",
+        },
+        text: "bueno.....",
+        id: 5,
+      },
+    ],
+  };
 
   const author = new schema.Entity("author", {}, { idAttribute: "email" });
 

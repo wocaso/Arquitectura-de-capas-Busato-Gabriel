@@ -40,6 +40,7 @@ class MongooseContainer{
         try{
             await this.#connectDB()
             const allMensajes = await this.model.find();
+            console.log("se llego hacia "+allMensajes)
             return allMensajes; 
         }catch(error){
           errorLogger.error("no se pudieron traer los mensajes error:"+error)

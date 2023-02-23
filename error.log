@@ -131,3 +131,21 @@
 {"level":"error"}
 {"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
 {"level":"error","message":"no se pudieron traer los mensajes error:MongooseError: Can't call `openUri()` on an active connection with different connection strings. Make sure you aren't calling `mongoose.connect()` multiple times. See: https://mongoosejs.com/docs/connections.html#multiple_connections"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoServerClosedError: Server is closed"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
