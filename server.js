@@ -397,26 +397,27 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
         // });
         const msjsNorm = normalize(mensajess, msjsSchema);
         socket.emit("messages", msjsNorm);
-
-    conectarProductos().then((res) => {
-      const sql = res;
-      sql
-        .listarProductos()
-        .then((items) => {
-          socket.emit("products", items);
-        })
-        .catch((err) =>{
-          sql.crearTabla().then(() => {
-          console.log("Tabla productos creada");
-          errorLogger.error(err)
-        })}
+        socket.emit("products", itemss);
+    // conectarProductos().then((res) => {
+    //   const sql = res;
+    //   sql
+    //     .listarProductos()
+    //     .then((items) => {
+    //       console.log(items);
+    //       socket.emit("products", items);
+    //     })
+    //     .catch((err) =>{
+    //       sql.crearTabla().then(() => {
+    //       console.log("Tabla productos creada");
+    //       errorLogger.error(err)
+    //     })}
           
           
-        )
-        .finally(() => {
-          sql.close();
-        });
-    });
+    //     )
+    //     .finally(() => {
+    //       sql.close();
+    //     });
+    // });
 
     socket.on("new-message", (data) => {
       // mongooseDB.addNew(data).then(() => {
@@ -433,21 +434,23 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
       // });
     });
     socket.on("new-producto", (data) => {
-      conectarProductos().then((res) => {
-        const sql = res;
-        sql
-          .insertarProductos(data)
-          .then(() =>
-            sql.listarProductos().then((items) => {
-              socket.emit("products", items);
-            })
-          ).catch(err=>{
-            errorLogger.error(err)
-          })
-          .finally(() => {
-            sql.close();
-          });
-      });
+      itemss.push(data);
+      socket.emit("products", itemss);
+      // conectarProductos().then((res) => {
+      //   const sql = res;
+      //   sql
+      //     .insertarProductos(data)
+      //     .then(() =>
+      //       sql.listarProductos().then((items) => {
+      //         ocket.emit("products", items);
+      //       })
+      //     ).catch(err=>{
+      //       errorLogger.error(err)
+      //     })
+      //     .finally(() => {
+      //       sql.close();
+      //     });
+      // });
     });
 
     socket.emit("productsFaker", fiveProducts());
@@ -530,6 +533,33 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
       },
     ],
   };
+
+  const itemss = [
+    {
+      id: 1,
+      tittle: 'Microndas',
+      price: 5000,
+      thumbnail: 'https://cdn1.iconfinder.com/data/icons/home-tools-1/136/microwave-512.png'
+    },
+    {
+      id: 2,
+      tittle: 'Horno',
+      price: 6500,
+      thumbnail: 'https://cdn1.iconfinder.com/data/icons/home-tools-1/136/stove-512.png'
+    },
+    {
+      id: 3,
+      tittle: 'Aspiradora',
+      price: 3000,
+      thumbnail: 'https://cdn0.iconfinder.com/data/icons/home-improvements-set-2-1/66/70-256.png'
+    },
+    {
+      id: 4,
+      tittle: 'Licuadora',
+      price: 2000,
+      thumbnail: 'https://cdn1.iconfinder.com/data/icons/kitchen-and-food-2/44/blender-512.png'
+    }
+  ];
 
   const author = new schema.Entity("author", {}, { idAttribute: "email" });
 
