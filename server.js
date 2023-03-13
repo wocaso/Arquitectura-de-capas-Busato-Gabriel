@@ -387,187 +387,150 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   // })
   //-------------------------------------------------------------------------------------------------------//
 
-  io.on("connection", (socket) => {
-    console.log("un cliente se ha conectado");
-        // mongooseDB.getAll().then((res) => {
-        //   let dataString = JSON.stringify(res);
-        //   let dataParse = JSON.parse(dataString);
-        //   const msjsNorm = normalize(dataParse[0], msjsSchema);
-        //   socket.emit("messages", msjsNorm);
-        // });
-        const msjsNorm = normalize(mensajess, msjsSchema);
+//-------------------------------------------------------------------------------------------------------//
+
+io.on("connection", (socket) => {
+  console.log("un cliente se ha conectado");
+  mongooseDB.getAll().then((res)=>{
+    let dataString =  JSON.stringify(res);
+    let dataParse = JSON.parse(dataString);
+    const msjsNorm = normalize(dataParse[0] , msjsSchema);
+    socket.emit("messages", msjsNorm);
+    // socket.emit("messages", res[0].messages);
+  })
+  conectarProductos().then((res) => {
+    const sql = res;
+    sql
+      .listarProductos()
+      .then((items) => {
+        socket.emit("products", items);
+      })
+      .catch(() =>
+        sql.crearTabla().then(() => {
+          console.log("Tabla productos creada");
+        })
+      )
+      .finally(() => {
+        sql.close();
+      });
+  });
+
+  socket.on("new-message", (data) => {
+    mongooseDB.addNew(data).then(()=>{
+      mongooseDB.getAll().then((res)=>{
+        let dataString =  JSON.stringify(res);
+        let dataParse = JSON.parse(dataString);
+        const msjsNorm = normalize(dataParse[0] , msjsSchema);
         socket.emit("messages", msjsNorm);
-        socket.emit("products", itemss);
-    // conectarProductos().then((res) => {
-    //   const sql = res;
-    //   sql
-    //     .listarProductos()
-    //     .then((items) => {
-    //       console.log(items);
-    //       socket.emit("products", items);
-    //     })
-    //     .catch((err) =>{
-    //       sql.crearTabla().then(() => {
-    //       console.log("Tabla productos creada");
-    //       errorLogger.error(err)
-    //     })}
-          
-          
-    //     )
-    //     .finally(() => {
-    //       sql.close();
-    //     });
-    // });
-
-    socket.on("new-message", (data) => {
-      // mongooseDB.addNew(data).then(() => {
-
-        // mongooseDB.getAll().then((res) => {
-        //   let dataString = JSON.stringify(res);
-        //   let dataParse = JSON.parse(dataString);
-        //   const msjsNorm = normalize(dataParse[0], msjsSchema);
-        //   socket.emit("messages", msjsNorm);
-        // });
-          mensajess.messages.push(data)
-          const msjsNorm = normalize(mensajess, msjsSchema);
-          socket.emit("messages", msjsNorm);
-      // });
+      })
+    })
+  });
+  socket.on("new-producto", (data) => {
+    conectarProductos().then((res) => {
+      const sql = res;
+      sql
+        .insertarProductos(data)
+        .then(() =>
+          sql.listarProductos().then((items) => {
+            socket.emit("products", items);
+          })
+        )
+        .finally(() => {
+          sql.close();
+        });
     });
-    socket.on("new-producto", (data) => {
-      itemss.push(data);
-      socket.emit("products", itemss);
-      // conectarProductos().then((res) => {
-      //   const sql = res;
-      //   sql
-      //     .insertarProductos(data)
-      //     .then(() =>
-      //       sql.listarProductos().then((items) => {
-      //         ocket.emit("products", items);
-      //       })
-      //     ).catch(err=>{
-      //       errorLogger.error(err)
-      //     })
-      //     .finally(() => {
-      //       sql.close();
-      //     });
-      // });
-    });
-
-    socket.emit("productsFaker", fiveProducts());
   });
 
-  const mensajess = {
-    id: "coderChat",
-    messages: [
-      {
-        author: {
-          email: "Eduardo@gmail.com",
-          nombre: "Eduardo",
-          apellido: "Bustamante",
-          edad: "20",
-          alias: "Edu",
-          avatar: "Hermoso avatar.jpg",
-        },
-        text: "Holis",
-        id: 0,
-      },
-      {
-        author: {
-          email: "Eduardo@gmail.com",
-          nombre: "Eduardo",
-          apellido: "Bustamante",
-          edad: "20",
-          alias: "Edu",
-          avatar: "Hermoso avatar.jpg",
-        },
-        text: "Alguien me responde",
-        id: 1,
-      },
-      {
-        author: {
-          email: "Eduardo@gmail.com",
-          nombre: "Eduardo",
-          apellido: "Bustamante",
-          edad: "20",
-          alias: "Edu",
-          avatar: "Hermoso avatar.jpg",
-        },
-        text: "Bueno",
-        id: 2,
-      },
-      {
-        author: {
-          email: "Carla@gmail.com",
-          nombre: "Carla",
-          apellido: "Lopez",
-          edad: "30",
-          alias: "Carli",
-          avatar: "Feo avatar.jpg",
-        },
-        text: "ei hola",
-        id: 3,
-      },
-      {
-        author: {
-          email: "Carla@gmail.com",
-          nombre: "Carla",
-          apellido: "Lopez",
-          edad: "30",
-          alias: "Carli",
-          avatar: "Feo avatar.jpg",
-        },
-        text: "Hola hola hola",
-        id: 4,
-      },
-      {
-        author: {
-          email: "Carla@gmail.com",
-          nombre: "Carla",
-          apellido: "Lopez",
-          edad: "30",
-          alias: "Carli",
-          avatar: "Feo avatar.jpg",
-        },
-        text: "bueno.....",
-        id: 5,
-      },
-    ],
-  };
+  socket.emit("productsFaker", fiveProducts());
+});
 
-  const itemss = [
-    {
-      id: 1,
-      tittle: 'Microndas',
-      price: 5000,
-      thumbnail: 'https://cdn1.iconfinder.com/data/icons/home-tools-1/136/microwave-512.png'
-    },
-    {
-      id: 2,
-      tittle: 'Horno',
-      price: 6500,
-      thumbnail: 'https://cdn1.iconfinder.com/data/icons/home-tools-1/136/stove-512.png'
-    },
-    {
-      id: 3,
-      tittle: 'Aspiradora',
-      price: 3000,
-      thumbnail: 'https://cdn0.iconfinder.com/data/icons/home-improvements-set-2-1/66/70-256.png'
-    },
-    {
-      id: 4,
-      tittle: 'Licuadora',
-      price: 2000,
-      thumbnail: 'https://cdn1.iconfinder.com/data/icons/kitchen-and-food-2/44/blender-512.png'
-    }
-  ];
 
-  const author = new schema.Entity("author", {}, { idAttribute: "email" });
 
-  const msj = new schema.Entity("message", {
-    author: author,
-  });
+// const mensajess = {
+//   id: "coderChat",
+//   messages: [
+//     {
+//       author: {
+//         email: "Eduardo@gmail.com",
+//         nombre: "Eduardo",
+//         apellido: "Bustamante",
+//         edad: "20",
+//         alias: "Edu",
+//         avatar: "Hermoso avatar.jpg",
+//       },
+//       text: "Holis",
+//       id: 0,
+//     },
+//     {
+//       author: {
+//         email: "Eduardo@gmail.com",
+//         nombre: "Eduardo",
+//         apellido: "Bustamante",
+//         edad: "20",
+//         alias: "Edu",
+//         avatar: "Hermoso avatar.jpg",
+//       },
+//       text: "Alguien me responde",
+//       id: 1,
+//     },
+//     {
+//       author: {
+//         email: "Eduardo@gmail.com",
+//         nombre: "Eduardo",
+//         apellido: "Bustamante",
+//         edad: "20",
+//         alias: "Edu",
+//         avatar: "Hermoso avatar.jpg",
+//       },
+//       text: "Bueno",
+//       id: 2,
+//     },
+//     {
+//       author: {
+//         email: "Carla@gmail.com",
+//         nombre: "Carla",
+//         apellido: "Lopez",
+//         edad: "30",
+//         alias: "Carli",
+//         avatar: "Feo avatar.jpg",
+//       },
+//       text: "ei hola",
+//       id: 3,
+//     },
+//     {
+//       author: {
+//         email: "Carla@gmail.com",
+//         nombre: "Carla",
+//         apellido: "Lopez",
+//         edad: "30",
+//         alias: "Carli",
+//         avatar: "Feo avatar.jpg",
+//       },
+//       text: "Hola hola hola",
+//       id: 4,
+//     },
+//     {
+//       author: {
+//         email: "Carla@gmail.com",
+//         nombre: "Carla",
+//         apellido: "Lopez",
+//         edad: "30",
+//         alias: "Carli",
+//         avatar: "Feo avatar.jpg",
+//       },
+//       text: "bueno.....",
+//       id: 5,
+//     },
+//   ],
+// };
 
-  const msjsSchema = new schema.Entity("messages", {
-    messages: [msj],
-  });
-}
+
+const author = new schema.Entity("author",{},{idAttribute: 'email'});
+
+const msj = new schema.Entity("message", {
+  author: author,
+});
+
+const msjsSchema = new schema.Entity("messages", {
+  messages: [msj],
+})}
