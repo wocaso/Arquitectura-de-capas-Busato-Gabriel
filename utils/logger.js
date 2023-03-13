@@ -25,8 +25,17 @@ function buildErrorLogger() {
     })
 }
 
+
+
 let infoLogger = buildInfoLogger()
 let warnLogger = buildWarnLogger()
 let errorLogger = buildErrorLogger()
 
-module.exports = {infoLogger, warnLogger, errorLogger};
+function showReqDataInfo(req){
+    infoLogger.info("Hiciste un "+req.method+" a la ruta: '" +req.originalUrl+"'");
+  }
+  function showReqDataWarn(req){
+    warnLogger.warn("intentaste hacer un "+req.method+" a la ruta: '" +req.originalUrl+"' pero esta no existe :c");
+  }
+
+module.exports = {infoLogger, warnLogger, errorLogger, showReqDataInfo, showReqDataWarn};

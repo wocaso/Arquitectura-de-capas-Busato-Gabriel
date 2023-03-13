@@ -151,3 +151,6 @@
 {"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
 {"level":"error"}
 {"level":"error","message":"no se pudieron traer los mensajes error:MongoNotConnectedError: Client must be connected before running operations"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}

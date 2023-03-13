@@ -6,28 +6,22 @@ const handlebars = require("express-handlebars");
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
 //-------------------------------------------------------------------------------------------------------//
-//Compression y winston//
+//  Compression//
 //-------------------------------------------------------------------------------------------------------//
 const compression = require("compression");
-const {infoLogger, warnLogger, errorLogger} = require("./utils/logger.js")
-function showReqDataInfo(req){
-  infoLogger.info("Hiciste un "+req.method+" a la ruta: '" +req.originalUrl+"'");
-}
-function showReqDataWarn(req){
-  warnLogger.warn("intentaste hacer un "+req.method+" a la ruta: '" +req.originalUrl+"' pero esta no existe :c");
-}
+//-------------------------------------------------------------------------------------------------------//
+//  winston logger//
+//-------------------------------------------------------------------------------------------------------//
+const {
+  infoLogger,
+  showReqDataInfo,
+  showReqDataWarn,
+} = require("./utils/logger.js");
 //-------------------------------------------------------------------------------------------------------//
 //Dotenv y yargs//
 //-------------------------------------------------------------------------------------------------------//
 const dotenv = require("dotenv");
 dotenv.config();
-
-// //minimist
-// const parseArgs = require("minimist");
-// const args = parseArgs(process.argv.slice(2));
-// const MODE = args.m || "FORK";
-// const PORT = args.p || 8080;
-
 // yargs
 const parseArgs = require("yargs/yargs");
 const yargs = parseArgs(process.argv.slice(2));
@@ -41,7 +35,10 @@ const { PORT, MODE } = yargs
     MODE: "FORK",
   }).argv;
 
-console.log({ PORT, MODE });
+console.log({
+  PORT,
+  MODE,
+});
 //-------------------------------------------------------------------------------------------------------//
 //Cluster y fork//
 //-------------------------------------------------------------------------------------------------------//
@@ -79,28 +76,16 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   //-------------------------------------------------------------------------------------------------------//
   //MongoDB y faker//
   //-------------------------------------------------------------------------------------------------------//
-  //importo los modelos
-  const { mensajes, usuarios } = require("./models/modelsMongoose.js");
-  //importo los containers
   const {
-    MongooseContainer,
-    MongooseContainerUsuarios,
-  } = require("./containers/mongooseContainer.js");
-  //Creo las instancias para usar las bases de datos
-  const mongooseDB = new MongooseContainer(
-    process.env.MONGOURLmensajes,
-    mensajes
-  );
-  const mongooseDBusers = new MongooseContainerUsuarios(
-    process.env.MONGOURLusuarios,
-    usuarios
-  );
-  const { fiveProducts } = require("./utils/productosFaker");
+    mongooseDB,
+    mongooseDBusers,
+    fiveProducts,
+  } = require("./persistence/mongoPersistence");
   //-------------------------------------------------------------------------------------------------------//
   //Normalizr//
   //-------------------------------------------------------------------------------------------------------//
-
-  const { normalize, schema } = require("normalizr");
+  const { normalize } = require("normalizr");
+  const { msjsSchema } = require("./utils/normalizr");
 
   //-------------------------------------------------------------------------------------------------------//
   //SQL usado en la parte de productos basica.//
@@ -117,7 +102,11 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   app.engine("handlebars", handlebars.engine());
   app.set("views", "./public/views");
   app.set("view engine", "handlebars");
-  app.use(express.urlencoded({ extended: true }));
+  app.use(
+    express.urlencoded({
+      extended: true,
+    })
+  );
   app.use(express.json());
 
   //-------------------------------------------------------------------------------------------------------//
@@ -176,13 +165,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   //-------------//
   //reqAuth//
   //-------------//
-  function requireAuthentication(req, res, next) {
-    if (req.isAuthenticated()) {
-      next();
-    } else {
-      res.redirect("/login");
-    }
-  }
+  const { requireAuthentication } = require("./utils/passport");
 
   //-------------------------------------------------------------------------------------------------------//
   //MongoAtlas-Session//
@@ -210,7 +193,7 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(compression())
+  app.use(compression());
 
   passport.serializeUser((user, done) => {
     done(null, user.username);
@@ -226,122 +209,39 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   //-------------------------------------------------------------------------------------------------------//
 
   httpServer.listen(PORT, () => {
-    infoLogger.info("servidor escuchando en el puerto " + PORT);   
+    infoLogger.info("servidor escuchando en el puerto " + PORT);
   });
-
   //----------------------------//
   //    Rutas Registro
   //----------------------------//
-
-
-
-  app.get("/register", (req, res) => {
-    res.render("register");
-    showReqDataInfo(req)
-  });
-
-  app.post(
-    "/register",
-    passport.authenticate("register", {
-      failureRedirect: "/failregister",
-      successRedirect: "/datos",
-    })
-  );
-
-  app.get("/failregister", (req, res) => {
-    res.render("register-error");
-    showReqDataInfo(req)
-  });
+  const { routerRegister } = require("./Routes/registerRoutes");
+  app.use(routerRegister);
   //----------------------------//
   //    Rutas Login
   //----------------------------//
-  app.get("/login", (req, res) => {
-    showReqDataInfo(req)
-    if (req.isAuthenticated()) {
-      res.redirect("/datos");
-    }else{
-      res.render("login");
-    }
-
-    
-
-  });
-
-  app.post(
-    "/login",
-    passport.authenticate("login", {
-      failureRedirect: "/faillogin",
-      successRedirect: "/datos",
-    })
-  );
-
-  app.get("/faillogin", (req, res) => {
-    res.render("login-error");
-    showReqDataInfo(req)
-  });
-  //----------------------------//
+  const { routerLogin } = require("./Routes/loginRoutes");
+  app.use(routerLogin);
+  // //----------------------------//
   //    Rutas datos
   //----------------------------//
-
-  app.get("/datos", requireAuthentication, (req, res) => {
-    res.render("datos", { user: req.session.passport.user });
-    showReqDataInfo(req)
-  });
+  const { routerDatos } = require("./Routes/datosRoutes");
+  app.use(routerDatos);
   //----------------------------//
   //    Rutas Logout
   //----------------------------//
-
-  app.get("/logout", (req, res) => {
-    showReqDataInfo(req)
-    req.logout((err) => {
-      res.redirect("/login");
-    });
-  });
-
-  app.get("/api/productos-test", (req, res) => {
-    res.render("productosTest");
-    showReqDataInfo(req)
-  });
+const {routerLogout} = require("./Routes/logoutRoutes")
+app.use(routerLogout);
   //----------------------------//
   //    Ruta info
   //----------------------------//
-  console.log();
-  app.get("/info", (req, res) => {
-    res.render("info", {
-      SO: process.platform,
-      ArgEntr: JSON.stringify(yargs.argv),
-      NodeVersion: process.version,
-      ReservedMemory: process.memoryUsage().rss,
-      pathEjecucion: process.cwd(),
-      processID: process.pid,
-      proyectFolder: process.cwd().split("\\").pop(),
-      numProcesadores: numCpus,
-    });
-    showReqDataInfo(req)
-    // console.log("Hola")
-  });
-
-  //----------------------------//
-  //    Ruta numeros random
-  //----------------------------//
-  // routerNumeros.get("/", (req, res) => {
-  //   const numFork = fork("./utils/count.js");
-  //   let cantidad = 10000000;
-  //   if (req.query.cant != null) {
-  //     cantidad = req.query.cant;
-  //   }
-  //   numFork.send(cantidad);
-  //   numFork.on("message", (msg) => {
-  //     res.send(msg);
-  //   });
-  //   showReqDataInfo(req)
-  // });
+const {routerInfo} = require("./Routes/infoRoutes")
+app.use(routerInfo);
   //----------------------------//
   //    Ruta general
   //----------------------------//
   app.get("*", (req, res) => {
     res.redirect("/datos");
-    showReqDataWarn(req)
+    showReqDataWarn(req);
   });
   //-------------------------------------------------------------------------------------------------------//
   // Usado para inicializar unos productos por defecto en SQL.//
@@ -387,150 +287,136 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   // })
   //-------------------------------------------------------------------------------------------------------//
 
-//-------------------------------------------------------------------------------------------------------//
+  //-------------------------------------------------------------------------------------------------------//
 
-io.on("connection", (socket) => {
-  console.log("un cliente se ha conectado");
-  mongooseDB.getAll().then((res)=>{
-    let dataString =  JSON.stringify(res);
-    let dataParse = JSON.parse(dataString);
-    const msjsNorm = normalize(dataParse[0] , msjsSchema);
-    socket.emit("messages", msjsNorm);
-    // socket.emit("messages", res[0].messages);
-  })
-  conectarProductos().then((res) => {
-    const sql = res;
-    sql
-      .listarProductos()
-      .then((items) => {
-        socket.emit("products", items);
-      })
-      .catch(() =>
-        sql.crearTabla().then(() => {
-          console.log("Tabla productos creada");
-        })
-      )
-      .finally(() => {
-        sql.close();
-      });
-  });
-
-  socket.on("new-message", (data) => {
-    mongooseDB.addNew(data).then(()=>{
-      mongooseDB.getAll().then((res)=>{
-        let dataString =  JSON.stringify(res);
-        let dataParse = JSON.parse(dataString);
-        const msjsNorm = normalize(dataParse[0] , msjsSchema);
-        socket.emit("messages", msjsNorm);
-      })
-    })
-  });
-  socket.on("new-producto", (data) => {
+  io.on("connection", (socket) => {
+    console.log("un cliente se ha conectado");
+    mongooseDB.getAll().then((res) => {
+      let dataString = JSON.stringify(res);
+      let dataParse = JSON.parse(dataString);
+      const msjsNorm = normalize(dataParse[0], msjsSchema);
+      socket.emit("messages", msjsNorm);
+      // socket.emit("messages", res[0].messages);
+    });
     conectarProductos().then((res) => {
       const sql = res;
       sql
-        .insertarProductos(data)
-        .then(() =>
-          sql.listarProductos().then((items) => {
-            socket.emit("products", items);
+        .listarProductos()
+        .then((items) => {
+          socket.emit("products", items);
+        })
+        .catch(() =>
+          sql.crearTabla().then(() => {
+            console.log("Tabla productos creada");
           })
         )
         .finally(() => {
           sql.close();
         });
     });
+
+    socket.on("new-message", (data) => {
+      mongooseDB.addNew(data).then(() => {
+        mongooseDB.getAll().then((res) => {
+          let dataString = JSON.stringify(res);
+          let dataParse = JSON.parse(dataString);
+          const msjsNorm = normalize(dataParse[0], msjsSchema);
+          socket.emit("messages", msjsNorm);
+        });
+      });
+    });
+    socket.on("new-producto", (data) => {
+      conectarProductos().then((res) => {
+        const sql = res;
+        sql
+          .insertarProductos(data)
+          .then(() =>
+            sql.listarProductos().then((items) => {
+              socket.emit("products", items);
+            })
+          )
+          .finally(() => {
+            sql.close();
+          });
+      });
+    });
+
+    socket.emit("productsFaker", fiveProducts());
   });
-
-  socket.emit("productsFaker", fiveProducts());
-});
-
-
-
-// const mensajess = {
-//   id: "coderChat",
-//   messages: [
-//     {
-//       author: {
-//         email: "Eduardo@gmail.com",
-//         nombre: "Eduardo",
-//         apellido: "Bustamante",
-//         edad: "20",
-//         alias: "Edu",
-//         avatar: "Hermoso avatar.jpg",
-//       },
-//       text: "Holis",
-//       id: 0,
-//     },
-//     {
-//       author: {
-//         email: "Eduardo@gmail.com",
-//         nombre: "Eduardo",
-//         apellido: "Bustamante",
-//         edad: "20",
-//         alias: "Edu",
-//         avatar: "Hermoso avatar.jpg",
-//       },
-//       text: "Alguien me responde",
-//       id: 1,
-//     },
-//     {
-//       author: {
-//         email: "Eduardo@gmail.com",
-//         nombre: "Eduardo",
-//         apellido: "Bustamante",
-//         edad: "20",
-//         alias: "Edu",
-//         avatar: "Hermoso avatar.jpg",
-//       },
-//       text: "Bueno",
-//       id: 2,
-//     },
-//     {
-//       author: {
-//         email: "Carla@gmail.com",
-//         nombre: "Carla",
-//         apellido: "Lopez",
-//         edad: "30",
-//         alias: "Carli",
-//         avatar: "Feo avatar.jpg",
-//       },
-//       text: "ei hola",
-//       id: 3,
-//     },
-//     {
-//       author: {
-//         email: "Carla@gmail.com",
-//         nombre: "Carla",
-//         apellido: "Lopez",
-//         edad: "30",
-//         alias: "Carli",
-//         avatar: "Feo avatar.jpg",
-//       },
-//       text: "Hola hola hola",
-//       id: 4,
-//     },
-//     {
-//       author: {
-//         email: "Carla@gmail.com",
-//         nombre: "Carla",
-//         apellido: "Lopez",
-//         edad: "30",
-//         alias: "Carli",
-//         avatar: "Feo avatar.jpg",
-//       },
-//       text: "bueno.....",
-//       id: 5,
-//     },
-//   ],
-// };
-
-
-const author = new schema.Entity("author",{},{idAttribute: 'email'});
-
-const msj = new schema.Entity("message", {
-  author: author,
-});
-
-const msjsSchema = new schema.Entity("messages", {
-  messages: [msj],
-})}
+  //   id: "coderChat",
+  //   messages: [
+  //     {
+  //       author: {
+  //         email: "Eduardo@gmail.com",
+  //         nombre: "Eduardo",
+  //         apellido: "Bustamante",
+  //         edad: "20",
+  //         alias: "Edu",
+  //         avatar: "Hermoso avatar.jpg",
+  //       },
+  //       text: "Holis",
+  //       id: 0,
+  //     },
+  //     {
+  //       author: {
+  //         email: "Eduardo@gmail.com",
+  //         nombre: "Eduardo",
+  //         apellido: "Bustamante",
+  //         edad: "20",
+  //         alias: "Edu",
+  //         avatar: "Hermoso avatar.jpg",
+  //       },
+  //       text: "Alguien me responde",
+  //       id: 1,
+  //     },
+  //     {
+  //       author: {
+  //         email: "Eduardo@gmail.com",
+  //         nombre: "Eduardo",
+  //         apellido: "Bustamante",
+  //         edad: "20",
+  //         alias: "Edu",
+  //         avatar: "Hermoso avatar.jpg",
+  //       },
+  //       text: "Bueno",
+  //       id: 2,
+  //     },
+  //     {
+  //       author: {
+  //         email: "Carla@gmail.com",
+  //         nombre: "Carla",
+  //         apellido: "Lopez",
+  //         edad: "30",
+  //         alias: "Carli",
+  //         avatar: "Feo avatar.jpg",
+  //       },
+  //       text: "ei hola",
+  //       id: 3,
+  //     },
+  //     {
+  //       author: {
+  //         email: "Carla@gmail.com",
+  //         nombre: "Carla",
+  //         apellido: "Lopez",
+  //         edad: "30",
+  //         alias: "Carli",
+  //         avatar: "Feo avatar.jpg",
+  //       },
+  //       text: "Hola hola hola",
+  //       id: 4,
+  //     },
+  //     {
+  //       author: {
+  //         email: "Carla@gmail.com",
+  //         nombre: "Carla",
+  //         apellido: "Lopez",
+  //         edad: "30",
+  //         alias: "Carli",
+  //         avatar: "Feo avatar.jpg",
+  //       },
+  //       text: "bueno.....",
+  //       id: 5,
+  //     },
+  //   ],
+  // };
+}
