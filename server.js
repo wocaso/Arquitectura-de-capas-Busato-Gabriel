@@ -14,31 +14,12 @@ const compression = require("compression");
 //-------------------------------------------------------------------------------------------------------//
 const {
   infoLogger,
-  showReqDataInfo,
   showReqDataWarn,
 } = require("./utils/logger.js");
 //-------------------------------------------------------------------------------------------------------//
 //Dotenv y yargs//
 //-------------------------------------------------------------------------------------------------------//
-const dotenv = require("dotenv");
-dotenv.config();
-// yargs
-const parseArgs = require("yargs/yargs");
-const yargs = parseArgs(process.argv.slice(2));
-const { PORT, MODE } = yargs
-  .alias({
-    p: "PORT",
-    m: "MODE",
-  })
-  .default({
-    PORT: process.env.PORT || 8080,
-    MODE: "FORK",
-  }).argv;
-
-console.log({
-  PORT,
-  MODE,
-});
+const { PORT, MODE } = require("./utils/yargsUtils");
 //-------------------------------------------------------------------------------------------------------//
 //Cluster y fork//
 //-------------------------------------------------------------------------------------------------------//
@@ -86,16 +67,10 @@ if (MODE == "CLUSTER" && cluster.isMaster) {
   //-------------------------------------------------------------------------------------------------------//
   const { normalize } = require("normalizr");
   const { msjsSchema } = require("./utils/normalizr");
-
   //-------------------------------------------------------------------------------------------------------//
   //SQL usado en la parte de productos basica.//
   //-------------------------------------------------------------------------------------------------------//
-  const { options } = require("./ecommerce/options/mysqlconn.js");
-  const { ClienteSQLproductos } = require("./ecommerce/client");
-  async function conectarProductos() {
-    const con = new ClienteSQLproductos(options);
-    return con;
-  }
+const {conectarProductos} = require("./persistence/SQLPersistence")
   //-------------------------------------------------------------------------------------------------------//
   //Handlebars//
   //-------------------------------------------------------------------------------------------------------//
